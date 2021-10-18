@@ -34,14 +34,11 @@ To :
 When you require `simple-http`, you get a table with the following values. You can learn more about each below.
 
 * [`request`](#requestmethod-url-payload-encoding-headers-schema-options)
-* [`urlEncodeString`](#urlencodestringstr)
-* [`urlDecodeString`](#urldecodestringstr)
-* [`urlEncode`](#urlencodetbl)
-* [`urlDecode`](#urldecodestr)
 * [`Encoding`](#encoding)
 * [`coroHttp`](https://bilal2453.github.io/coro-docs/docs/coro-http.html)
-* [`schema`](https://github.com/super-agent/schema)
 * [`json`](https://luvit.io/api/json.html)
+* [`querystring`](https://luvit.io/api/querystring.html)
+* [`schema`](https://github.com/super-agent/schema)
 
 <br>
 
@@ -74,56 +71,7 @@ When the request returns, if it specifies a `Content-Type` header with supported
 This function never throws an error unless faulty data is passed to it; it always returns a 3-tuple in the format `data`, `res`, `errInfo`. If the request succeeds, `data` will be the (possibly decoded) body, `res` will be the [Response](https://bilal2453.github.io/coro-docs/docs/coro-http.html#request-response) object returned by the request and `errInfo` will be `nil`. Otherwise, if the request fails, `data` will be `nil`, `res` will be an error message and `errInfo` *may* be extra data about why the request failed (for example, if the response returned a faulty body, it will be the body received).
 
 
-**Returns:** `string|data|nil`, [`Response`]((https://bilal2453.github.io/coro-docs/docs/coro-http.html#request-response))`|string`, `any|nil`
-
----
-#### `urlEncodeString(str)`
-
-|Parameter|Type    |
-|:-------:|:------:|
-|str      |`string`|
-
-Percent-encodes a string to be URL-safe.
-
-**Returns:** `string`
-
----
-#### `urlEncode(tbl)`
-
-|Parameter|Type   |
-|:-------:|:-----:|
-|tbl      |`table`|
-
-URL-encodes a table into the `x-www-form-urlencoded` format, such that:
-* all keys and values are converted to percent-encoded strings
-* keys and values are joined using the `=` character
-* key-value pairs are joined using the `&` character
-
-Both `{{key, value}, ...}` and `{[key] = value, ...}` formats are acceptable; use the latter to preserve order of pairs.
-
-**Returns:** `string`
-
----
-#### `urlDecodeString(str)`
-
-|Parameter|Type    |
-|:-------:|:------:|
-|str      |`string`|
-
-Decodes a URL-encoded string by replacing all percent escapes with the actual character.
-	
-**Returns:** `string`
-
----
-#### `urlDecode(str)`
-
-|Parameter|Type    |
-|:-------:|:------:|
-|str      |`string`|
-
-Decodes a URL-encoded string into a table; values are put into the resulting table indexed under the values.
-
-**Returns:** `table`
+**Returns:** `table|string|nil`, [`Response`]((https://bilal2453.github.io/coro-docs/docs/coro-http.html#request-response))`|string`, `any|nil`
 
 <br>
 
@@ -136,16 +84,4 @@ The `Encoding` enum is used to specify the encoding/decoding algorithm used by t
 |Enumeration|Value                                |Functions used|
 |:---------:|:-----------------------------------:|:------------:|
 |json       |`"application/json"`                 |[json.encode](https://luvit.io/api/json.html#json_json_encode_value_state) and [json.decode](https://luvit.io/api/json.html#json_json_decode_str_pos_nullval)|
-|url        |`"application/x-www-form-urlencoded"`|[urlEncode](#urlencodetbl) and [urlDecode](#urldecodestr)|
-
-
-<br>
-
-## Credit
-
-Inspired by [`coro-http`](https://bilal2453.github.io/coro-docs/docs/coro-http.html).
-
-References to write the URL encode/decode functions were taken from the following:
-* https://gist.github.com/liukun/f9ce7d6d14fa45fe9b924a3eed5c3d99
-* https://github.com/stuartpb/tvtropes-lua/blob/f97c5d73a2d547e9d56ba8c075fc95b26af1a393/urlencode.lua
-
+|url        |`"application/x-www-form-urlencoded"`|[querystring.stringify](https://luvit.io/api/querystring.html#querystring_querystring_stringify_obj_sep_eq_options) and [querystring.parse](https://luvit.io/api/querystring.html#querystring_querystring_parse_str_sep_eq_options)|

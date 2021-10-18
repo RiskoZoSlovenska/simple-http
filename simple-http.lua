@@ -14,6 +14,7 @@
 
 local http = require("coro-http")
 local json = require("json")
+local querystring = require("querystring")
 local schema = require("schema")
 
 local string = string
@@ -29,7 +30,7 @@ local Encoding = {
 
 
 
-local function normalizeKeyValueTable(tbl)
+local function normalizeHeaders(tbl)
 	local normalized = {}
 
 	for i = 1, #tbl do
@@ -45,92 +46,6 @@ local function normalizeKeyValueTable(tbl)
 	return normalized
 end
 
-
---[[
-	Refs for URL encode/decode functions:
-		- https://gist.github.com/liukun/f9ce7d6d14fa45fe9b924a3eed5c3d99
-		- https://github.com/stuartpb/tvtropes-lua/blob/f97c5d73a2d547e9d56ba8c075fc95b26af1a393/urlencode.lua
-]]
-local function percentEncodeChar(char)
-	return string.format("%%%02X", string.byte(char))
-end
-
---[[--
-	Percent-encodes a string to be URL-safe.
-
-	@param string str
-	@return string
-]]
-local function urlEncodeString(str)
-	return tostring(str)
-		:gsub("\r?\n", "\r\n")
-		:gsub("[^a-zA-Z0-9%-%._~ ]", percentEncodeChar)
-		:gsub(" ", "+")
-end
-
---[[--
-	URL-encodes a table into the x-www-form-urlencoded format, such that:
-		* all keys and values are converted to percent-encoded strings
-		* keys and values are joined using the '=' character
-		* key-value pairs are joined using the '&' character
-
-	Both {{key, value}, ...} and {[key] = value, ...} formats are acceptable;
-	use the latter to preserve order of pairs.
-
-	@param table tbl
-	@return string
-]]
-local function urlEncode(tbl)
-	local buf = {}
-
-	local normalized = normalizeKeyValueTable(tbl)
-	for i = 1, #normalized do
-		local pair = normalized[i]
-
-		table.insert(buf, urlEncodeString(pair[1]) .. "=" .. urlEncodeString(pair[2]))
-	end
-
-	return table.concat(buf, "&")
-end
-
-
-local function hexToChar(hex)
-	return string.char(tonumber(hex, 16))
-end
-
---[[--
-	Decodes a URL-encoded string by replacing all percent escapes with the
-	actual character.
-
-	@param string str
-	@return string
-]]
-local function urlDecodeString(str)
-	return str
-		:gsub("+", " ")
-		:gsub("%%(%x%x)", hexToChar)
-end
-
---[[--
-	Decodes a URL-encoded string into a table; values are put into the resulting
-	table indexed under the values.
-
-	@param string str
-	@return table
-]]
-local function urlDecode(str)
-	local tbl = {}
-
-	for entry in string.gmatch(str, "[^&]+") do
-		local k, v = entry:match("(.*)=(.*)")
-		tbl[urlDecodeString(k)] = urlDecodeString(v)
-	end
-
-	return tbl
-end
-
-
-
 local function findHeader(headers, query)
 	for i = 1, #headers do
 		local header = headers[i]
@@ -145,11 +60,11 @@ end
 
 local encoders = {
 	[Encoding.json] = json.encode,
-	[Encoding.url]  = urlEncode,
+	[Encoding.url]  = querystring.stringify,
 }
 local decoders = {
 	[Encoding.json] = json.decode,
-	[Encoding.url]  = urlDecode,
+	[Encoding.url]  = querystring.parse,
 }
 
 --[[--
@@ -192,7 +107,7 @@ local decoders = {
 ]]
 local function request(method, url, payload, encoding, headers, schema, options)
 	encoding = encoding or Encoding.json
-	headers = headers and normalizeKeyValueTable(headers) or {}
+	headers = headers and normalizeHeaders(headers) or {}
 
 	-- Insert Content-Type header
 	if not findHeader(headers, "content-type") then
@@ -255,15 +170,10 @@ end
 
 return {
 	request = request,
-
-	urlEncodeString = urlEncodeString,
-	urlDecodeString = urlDecodeString,
-	urlEncode = urlEncode,
-	urlDecode = urlDecode,
-
 	Encoding = Encoding,
 
 	coroHttp = http,
-	schema = schema,
 	json = json,
+	querystring = querystring,
+	schema = schema,
 }
