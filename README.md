@@ -2,7 +2,6 @@
 
 The goal of this [`coro-http`](https://bilal2453.github.io/coro-docs/docs/coro-http.html) wrapper is simple: to simplify the process of making simple HTTP requests as much as possible. `simple-http` offers [automatic content encoding/decoding](#encoding), [friendlier header declarations](#requestmethod-url-payload-encoding-headers-schema-options) and data verification using [`Schema`](https://github.com/super-agent/schema).
 
-<br>
 
 ## Installation
 
@@ -16,9 +15,8 @@ Once installed, it can be required using
 local http = require("simple-http")
 ```
 
-<br>
 
-## Example
+## Examples
 
 The [two examples on the `coro-http` docs page](https://bilal2453.github.io/coro-docs/docs/coro-http.html#request-examples) can be rewritten using `simple-http` as such:
 
@@ -79,7 +77,6 @@ end
 print("Definition of \"hello\": " .. definition[1].meanings[1].definitions[1].definition) -- Response is automatically decoded to a Lua table
 ```
 
-<br>
 
 ## Docs
 
@@ -94,7 +91,6 @@ When you require `simple-http`, you get a table with the following values. You c
 * [`querystring`](https://luvit.io/api/querystring.html)
 * [`schema`](https://github.com/super-agent/schema)
 
-<br>
 
 ### Functions
 
@@ -112,7 +108,6 @@ When you require `simple-http`, you get a table with the following values. You c
 
 *See [`coro-http.request`'s parameters](https://bilal2453.github.io/coro-docs/docs/coro-http.html#request-parameters) for more info.*
 
-<br>
 
 Performs an HTTP(S) request. Just like `coro-http.request`, this function has to be called from a coroutine.
 
@@ -130,10 +125,8 @@ This function will fail (return `nil` as the first argument) if:
 * the decoder function throws an error while decoding the response body, or
 * a schema check is provided and the body fails it.
 
+**Returns:** `table|string|nil`, `Response|string`, `any|nil`
 
-**Returns:** `table|string|nil`, [`Response`]((https://bilal2453.github.io/coro-docs/docs/coro-http.html#request-response))`|string`, `any|nil`
-
-<br>
 
 ### Enums
 
