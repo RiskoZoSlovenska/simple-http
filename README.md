@@ -47,7 +47,7 @@ end
 print("Webhook sent successfully!")
 ```
 
-To illustrate using schemas, the following code could be used to request the definition of "hello" from https://dictionaryapi.dev/:
+To illustrate using schemas, the following code could be used to request the definition of "hello" from https://dictionaryapi.dev/ :
 ```lua
 local endpoint = "https://api.dictionaryapi.dev/api/v2/entries/en/hello" -- Get the definition of "hello" from 
 
@@ -62,7 +62,8 @@ local responseSchema = RecordArray{
 	meanings = RecordArray{
 		partOfSpeech = String,
 		definitions = RecordArray{
-			example =  Optional(String),
+			definition = String,
+			example  = Optional(String),
 			synonyms = Optional(Array(String)),
 			antonyms = Optional(Array(String)),
 		},
@@ -136,5 +137,5 @@ The `Encoding` enum is used to specify the encoding/decoding algorithm used by t
 
 |Enumeration|Value                                |Functions used|
 |:---------:|:-----------------------------------:|:------------:|
-|json       |`"application/json"`                 |[json.encode](https://luvit.io/api/json.html#json_json_encode_value_state) and [json.decode](https://luvit.io/api/json.html#json_json_decode_str_pos_nullval)|
-|url        |`"application/x-www-form-urlencoded"`|[querystring.stringify](https://luvit.io/api/querystring.html#querystring_querystring_stringify_obj_sep_eq_options) and [querystring.parse](https://luvit.io/api/querystring.html#querystring_querystring_parse_str_sep_eq_options)|
+|json     |`application/json`                 |[json.encode](https://luvit.io/api/json.html#json_json_encode_value_state) and [json.decode](https://luvit.io/api/json.html#json_json_decode_str_pos_nullval)|
+|url      |`application/x-www-form-urlencoded`|[querystring.stringify](https://luvit.io/api/querystring.html#querystring_querystring_stringify_obj_sep_eq_options) and [querystring.parse](https://luvit.io/api/querystring.html#querystring_querystring_parse_str_sep_eq_options)|
