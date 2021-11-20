@@ -87,6 +87,7 @@ When you require `simple-http`, you get a table with the following values. You c
 
 * [`request`](#requestmethod-url-payload-encoding-headers-schema-options)
 * [`Encoding`](#encoding)
+* [`FailReason`](#failreason)
 * [`coroHttp`](https://bilal2453.github.io/coro-docs/docs/coro-http.html)
 * [`json`](https://luvit.io/api/json.html)
 * [`querystring`](https://luvit.io/api/querystring.html)
@@ -118,15 +119,32 @@ The `headers` parameter accepts both the `{{key, value}, ...}` and `{[key] = val
 
 When the request returns, if it specifies a `Content-Type` header with supported encoding, the data will be automatically decoded into a Lua table.
 
-This function never throws an error unless faulty data is passed to it; it always returns a 3-tuple in the format `data`, `res`, `errInfo`. If the request succeeds, `data` will be the (possibly decoded) body, `res` will be the [Response](https://bilal2453.github.io/coro-docs/docs/coro-http.html#request-response) object returned by the request and `errInfo` will be `nil`. Otherwise, if the request fails, `data` will be `nil`, `res` will be an error message and `errInfo` *may* be extra data about why the request failed (for example, if the response returned a faulty body, it will be the body received).
+This function never throws an error unless faulty data is passed to it; it always returns a 3-tuple in the format `data`, `res`, `errInfo`. If the request succeeds, `data` will be the (possibly decoded) body, `res` will be the [Response](https://bilal2453.github.io/coro-docs/docs/coro-http.html#request-response) object returned by the request and `errInfo` will be `nil`. Otherwise, if the request fails, `data` will be `nil`, `res` will be an error message and `errInfo` will be an [ErrorInfo](#errorinfo) object. See the [FailReason](#failreason) enumeration and the ErrorInfo structure for details.
 
-This function will fail (return `nil` as the first argument) if:
-* `coro-http.request` throws an error, or
-* the response status code is `300` or greater, or
-* the decoder function throws an error while decoding the response body, or
-* a schema check is provided and the body fails it.
+**Returns:** `table|string|nil`, `Response|string`, `ErrorInfo|nil`
 
-**Returns:** `table|string|nil`, `Response|string`, `any|nil`
+
+### Structures
+
+#### `ErrorInfo`
+
+Gives more information about the reason a request failed.
+|Entry    |Type                       |Description|
+|:-------:|:-------------------------:|:---------:|
+|type     |[`FailReason`](#failreason)|See the enumeration for details|
+|trace    |`string`                   |The stack trace of the error|
+|body     |`string\|table`            |The payload/body that caused an error|
+|response |`table`                    |The [Response](https://bilal2453.github.io/coro-docs/docs/coro-http.html#request-response) object that caused an error|
+
+Be default, only the `type` field is guaranteed to be present. Its value indicates what other fields are guaranteed to be present as well:
+|`type` value         |`trace`|`body`|`response`|
+|:--------------------|:-----:|:----:|:--------:|
+|`Unknown`            |❌    |❌    |❌       |
+|`BadPayload`         |✔️    |✔️    |❌       |
+|`RequestError`       |✔️    |❌    |❌       |
+|`BadResponseCode`    |❌    |✔️    |✔️       |
+|`BadResponseBody`    |✔️    |✔️    |✔️       |
+|`InvalidResponseBody`|❌    |✔️    |✔️       |
 
 
 ### Enums
@@ -139,3 +157,16 @@ The `Encoding` enum is used to specify the encoding/decoding algorithm used by t
 |:---------:|:-----------------------------------:|:------------:|
 |json     |`application/json`                 |[json.encode](https://luvit.io/api/json.html#json_json_encode_value_state) and [json.decode](https://luvit.io/api/json.html#json_json_decode_str_pos_nullval)|
 |url      |`application/x-www-form-urlencoded`|[querystring.stringify](https://luvit.io/api/querystring.html#querystring_querystring_stringify_obj_sep_eq_options) and [querystring.parse](https://luvit.io/api/querystring.html#querystring_querystring_parse_str_sep_eq_options)|
+
+#### `FailReason`
+
+The `FailReason` enum specifies a reason why a request failed.
+
+|Enumeration        |Value|Scenario Emitted|
+|:-----------------:|:---:|:--------------:|
+|Unknown            |`0`  |The reason is unknown (this should never happen)|
+|BadPayload         |`1`  |The encoder function threw an error while encoding the payload|
+|RequestError       |`2`  |The `coro-http.request` function threw an error|
+|BadResponseCode    |`3`  |The http code of the returned response was `300` or greater|
+|BadResponseBody    |`4`  |The decoder function threw an error while attempting to decode the response body|
+|InvalidResponseBody|`5`  |A schema check was provided and the (possibly decoded) response body failed it|
